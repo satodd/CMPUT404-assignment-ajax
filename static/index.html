@@ -23,9 +23,8 @@
     <script src="json2.js"></script>
   </head> 
   <body bgcolor="black" height="100%" width="100%"> 
-    <h1 style="color:white">Test</h2>
-
-    <canvas id="c" width="1000px" height="1000px" style="-webkit-tap-highlight-color: transparent; background-color:white;">
+    <h1 style="color:white; text-align:center;">Ajax Canvas Drawer</h2>
+    <canvas id="c" style="-webkit-tap-highlight-color: transparent; background-color:white;">
     </canvas> 
     <script>
 
@@ -43,8 +42,6 @@ function sendJSONXMLHTTPRequest(url, objects, callback) {
         if (xhr.readyState==4) {
             try {
                 if (xhr.status==200) {
-                    //XXX: parse some JSON from the request!
-                    //XXX: Pass the data to the callback!
                     callback(JSON.parse(xhr.responseText));
                 }
             } 
@@ -53,13 +50,9 @@ function sendJSONXMLHTTPRequest(url, objects, callback) {
             }
         }
     };
-    //XXX: POST to a URL
-    //XXX: set the mimetype and the accept headers!
-    // Remember to use application/json !
-
-    xhr.open("POST", url, true)
-    xhr.setRequestHeader.("Content-type","application/json");
-    xhr.setRequestHeader.("Accept","application/json");
+    xhr.open("POST", url);
+    xhr.setRequestHeader("Content-type","application/json");
+    xhr.setRequestHeader("Accept","*/*");
     if (objects == null) {
         xhr.send();
     }
@@ -72,16 +65,26 @@ function sendJSONXMLHTTPRequest(url, objects, callback) {
 world = {};
 
 //XXX: TODO Make this prettier!
+//Filled in circle, slightly smaller, made it a gradient!
 function drawCircle(context,entity) {
     with(context) {
         beginPath();              
-        lineWidth = 3;
+        lineWidth = 1;
         var x = entity["x"];
         var y = entity["y"];
-        //moveTo(x,y);
-        fillStyle = entity["colour"];
+
+        //Code for grdient: html5canvastutorials.com/tutorials/html5-canvas-radial-gradients/
+        var grd = createRadialGradient(238, 50, 10, 238, 50, 300);
+        //Light purple
+        grd.addColorStop(0, '#F2E6FF');
+        //Dark purple
+        grd.addColorStop(1, '#5600B3');
+        //fillStyle = entity["colour"];
+        fillStyle = grd;
         strokeStyle = fillStyle;
-        arc(x, y, (entity["radius"])?entity["radius"]:50, 0, 2.0 * Math.PI, false);  
+        arc(x, y, (entity["radius"])?entity["radius"]:50, 0, 2.0 * Math.PI, false);
+        fill();
+ 
         stroke();                                
     }
 }
@@ -152,11 +155,9 @@ function getPosition(e) {
 
 function addEntity(entity, data) {
     world[entity] = data;
-    //drawFrame(); // (but should we?)
-    drawNextFrame;
-
-    //XXX: Send a XHTML Request that updates the entity you just  modified!
-    sendJSONXMLHTTPRequest(host + "entity/" + entity, data, function() {
+    //Sends a XHTML Request that updates the entity you just  modified!
+    sendJSONXMLHTTPRequest('/entity/'+ entity, data, function(){
+        drawNextFrame();
     });
 }
 
@@ -265,26 +266,26 @@ mouse = (function() {
 
 // Add the application specific mouse listeners!
 //XXX: TODO Make these prettier!
+//Made shades of purple the default. Should show gradients in circle but just in case
 mouse.mousedowners.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'blue'});
+    addEntityWithoutName({'x':x,'y':y,'colour':'#cc99ff'});
 });
 
 mouse.mouseuppers.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'red'});
+    addEntityWithoutName({'x':x,'y':y,'colour':'#5900b3'});
 });
 
 mouse.mousedraggers.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'green',
-                          'radius':10});
+    addEntityWithoutName({'x':x,'y':y,'colour':'#9933ff', 'radius':10});
 });
 
 
 function update() {
-    //XXX: TODO Get the world from the webservice using a XMLHTTPRequest
-    sendJSONXMLHTTPRequest(path +'/world', null, function(data) {
+    //Get the world from the webservice using a XMLHTTPRequest
+    sendJSONXMLHTTPRequest("/world", null, function(data) {
         world = data;
         drawNextFrame();
-        });
+    });
     drawFrame();
 }
 
