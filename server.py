@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 # Copyright 2013 Abram Hindle
+# Copyright 2016 Sarah Todd Cmput 404
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -81,10 +82,9 @@ def update(entity):
     '''update the entities via this interface'''
     data = flask_post_json()
 
-    if request.method == 'PUT':
+    if request.method == 'POST':
         myWorld.set(entity, data)
     else:
-
         for key in data:
             myWorld.update(entity,key,data[key])
 
